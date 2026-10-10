@@ -44,7 +44,7 @@
 
 | URL | メソッド | エンドポイント | ログイン | 応答 |
 |---|---|---|---|---|
-| `/uploads/<filename>` | GET | `uploaded_file` | 不要 | 保存済みの画像ファイル。テンプレートなし |
+| `/uploads/posts/<filename>` | GET | `uploaded_file` | 不要 | 保存済みの画像ファイル。テンプレートなし |
 
 - `filename` はアプリが生成した保存名を使用する。
 - 配信元はアップロード用ディレクトリに限定し、Flaskの `send_from_directory` を使用する。
@@ -57,9 +57,9 @@
 
 | フォーム | 入力項目 | 主な検証 |
 |---|---|---|
-| 登録 | `email`、`password`、`password_confirm` | 必須、メール形式・重複、パスワード最低8文字・確認一致 |
+| 登録 | `display_name`、`email`、`password`、`password_confirm` | 必須、表示名1〜30文字、メール形式・重複、パスワード最低8文字・確認一致 |
 | ログイン | `email`、`password` | 必須、認証情報の一致 |
-| 投稿作成 | `photo`、`caption` | 写真1枚必須、JPEG・PNG、5MBまで、キャプション任意・最大200文字 |
+| 投稿作成 | `photo`、`caption` | 写真1枚必須、JPEG・PNG・GIF、5MBまで、キャプション任意・最大200文字 |
 
 - 投稿フォームはファイル送信用の `multipart/form-data` とする。
 - パスワード最低8文字と確認欄は、会話での提案に基づく既定案。

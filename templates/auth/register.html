@@ -9,10 +9,10 @@
         <p class="form-description">パスワードは8文字以上で設定してください。</p>
         <form method="post" action="{{ url_for('register') }}">
             {{ form.hidden_tag() }}
-            {% for field in [form.email, form.password, form.password_confirm] %}
+            {% for field in [form.display_name, form.email, form.password, form.password_confirm] %}
             <div class="form-field">
                 {{ field.label }}
-                {{ field(autocomplete=('email' if field.name == 'email' else 'new-password'), aria_invalid=('true' if field.errors else 'false'), aria_describedby=field.id ~ '-error') }}
+                {{ field(autocomplete=('email' if field.name == 'email' else ('nickname' if field.name == 'display_name' else 'new-password')), aria_invalid=('true' if field.errors else 'false'), aria_describedby=field.id ~ '-error') }}
                 <div id="{{ field.id }}-error">{% for error in field.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}</div>
             </div>
             {% endfor %}

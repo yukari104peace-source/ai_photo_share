@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField, SubmitField
+from flask_wtf.file import FileField, FileRequired
+from wtforms import PasswordField, StringField, SubmitField, TextAreaField
 from wtforms.validators import Email, EqualTo, InputRequired, Length
 
 
@@ -20,6 +21,10 @@ class LoginForm(FlaskForm):
 
 
 class RegisterForm(LoginForm):
+    display_name = StringField("表示名", filters=[strip_email], validators=[
+        InputRequired(message="表示名を入力してください。"),
+        Length(min=1, max=30, message="表示名は1〜30文字で入力してください。"),
+    ])
     password = PasswordField("パスワード", validators=[
         InputRequired(message="パスワードを入力してください。"),
         Length(min=8, message="パスワードは8文字以上で入力してください。"),
@@ -33,3 +38,11 @@ class RegisterForm(LoginForm):
 
 class LogoutForm(FlaskForm):
     submit = SubmitField("ログアウト")
+
+
+class PostForm(FlaskForm):
+    photo = FileField("写真", validators=[FileRequired(message="写真を選択してください。")])
+    caption = TextAreaField("キャプション（任意）", validators=[
+        Length(max=200, message="キャプションは200文字以内で入力してください。"),
+    ])
+    submit = SubmitField("投稿する")

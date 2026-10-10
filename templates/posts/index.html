@@ -20,6 +20,16 @@
         <span class="art-number">01 — EVERYDAY</span>
     </div>
 </section>
+<section class="post-feed" aria-labelledby="feed-title">
+    <p class="eyebrow">EVERYDAY JOURNAL</p><h2 id="feed-title">みんなの日々</h2>
+    {% for post in posts %}
+    <article class="photo-post">
+        <header><span>{{ post.user.display_name }}</span><time datetime="{{ post.created_at.isoformat() }}Z">{{ post.created_at | jst }}</time></header>
+        <img src="{{ url_for('uploaded_file', filename=post.image_filename) }}" alt="{{ post.caption or '投稿写真' }}" loading="lazy">
+        {% if post.caption %}<p class="post-caption">{{ post.caption }}</p>{% endif %}
+    </article>
+    {% else %}<p class="empty-feed">まだ投稿がありません。</p>{% endfor %}
+</section>
 <section class="concept" aria-label="コンセプト">
     <p class="eyebrow">KEEP A LITTLE OF TODAY.</p>
     <p>見慣れた日常に、<br>まだ知らない表情がある。</p>

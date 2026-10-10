@@ -1,8 +1,9 @@
 from pathlib import Path
+from datetime import timedelta, timezone
 
 import click
 from cachelib import FileSystemCache
-from flask import Flask, flash, redirect, render_template, session, url_for
+from flask import Flask, flash, redirect, render_template, session, url_for, send_from_directory, abort
 from flask_login import (
     LoginManager, current_user, login_required, login_user, logout_user,
 )
@@ -11,8 +12,9 @@ from flask_wtf.csrf import CSRFError, CSRFProtect
 from peewee import IntegrityError
 
 from config import load_config
-from forms import LoginForm, LogoutForm, RegisterForm
-from models import Post, User, db
+from forms import LoginForm, LogoutForm, RegisterForm, PostForm
+from models import Post, User, db, migrate_display_name
+from image_utils import InvalidImage, save_post_image
 
 
 def create_app(test_config=None):
@@ -43,7 +45,7 @@ def create_app(test_config=None):
 
     @app.context_processor
     def auth_forms():
-        return {"logout_form": LogoutForm()}
+        return {"logout_form": LogoutForm(formdata=None)}
 
     @app.errorhandler(CSRFError)
     def csrf_error(error):
@@ -53,6 +55,25 @@ def create_app(test_config=None):
         ), 400
 
     db.init(str(app.config["DATABASE"]))
+    upload_dir = Path(app.config["POST_UPLOAD_DIR"])
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    (upload_dir / ".gitkeep").touch(exist_ok=True)
+
+    @app.template_filter("jst")
+    def jst(value):
+        return value.replace(tzinfo=timezone.utc).astimezone(
+            timezone(timedelta(hours=9))
+        ).strftime("%Y年%m月%d日 %H:%M")
+
+    @app.errorhandler(413)
+    def too_large(error):
+        return render_template("errors/error.html", message="送信サイズが大きすぎます。写真は5MB以下にしてください。"), 413
+
+    @app.cli.command("migrate-db")
+    def migrate_db():
+        with db.connection_context():
+            migrate_display_name()
+        click.echo("表示名のDB移行が完了しました（既存データは保持）。")
 
     @app.before_request
     def connect_db():
@@ -69,11 +90,49 @@ def create_app(test_config=None):
         with db.connection_context():
             with db.atomic():
                 db.create_tables([User, Post], safe=True)
+                migrate_display_name()
         click.echo("データベースを初期化しました（既存データは保持）。")
 
     @app.get("/")
     def post_index():
-        return render_template("posts/index.html")
+        posts = list(Post.select(Post, User).join(User).order_by(Post.created_at.desc(), Post.id.desc()))
+        return render_template("posts/index.html", posts=posts)
+
+    @app.route("/posts/new", methods=["GET", "POST"])
+    @login_required
+    def post_create():
+        form = PostForm()
+        if form.validate_on_submit():
+            filename = None
+            try:
+                filename = save_post_image(
+                    form.photo.data, app.config["POST_UPLOAD_DIR"],
+                    app.config["MAX_IMAGE_BYTES"], app.config["ALLOWED_IMAGE_EXTENSIONS"],
+                )
+                with db.atomic():
+                    Post.create(user=current_user.id, image_filename=filename, caption=form.caption.data or "")
+            except InvalidImage as error:
+                form.photo.errors.append(str(error))
+            except Exception:
+                if filename:
+                    try:
+                        (Path(app.config["POST_UPLOAD_DIR"]) / filename).unlink(missing_ok=True)
+                    except OSError:
+                        app.logger.exception("保存失敗後の画像削除に失敗しました。")
+                app.logger.exception("投稿の保存に失敗しました。")
+                return render_template("errors/error.html", message="投稿を保存できませんでした。時間をおいて再度お試しください。"), 500
+            else:
+                flash("写真を投稿しました。")
+                return redirect(url_for("post_index"))
+        return render_template("posts/new.html", form=form)
+
+    @app.get("/uploads/posts/<filename>")
+    def uploaded_file(filename):
+        if not Post.get_or_none(Post.image_filename == filename):
+            abort(404)
+        response = send_from_directory(app.config["POST_UPLOAD_DIR"], filename)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        return response
 
     @app.route("/register", methods=["GET", "POST"])
     def register():
@@ -81,7 +140,7 @@ def create_app(test_config=None):
             return redirect(url_for("post_index"))
         form = RegisterForm()
         if form.validate_on_submit():
-            user = User(email=form.email.data)
+            user = User(email=form.email.data, display_name=form.display_name.data)
             user.set_password(form.password.data)
             try:
                 with db.atomic():

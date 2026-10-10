@@ -63,3 +63,16 @@ nav { gap:16px; font-size:11px; }.nav-button { padding:11px 12px; gap:10px; }.lo
 .auth-layout { grid-template-columns:1fr; min-height:0; }.auth-intro { padding:35px 8%; }.auth-poem { font-size:30px; margin:15px 0; }.auth-poem br { display:none; }.intro-index { display:none; }.auth-panel { padding:45px 8% 65px; }
 }
 @media(prefers-reduced-motion:reduce) { * { transition:none !important; } }
+
+.post-feed { max-width:760px; margin:auto; padding:75px 24px; }
+.post-feed h2 { font-size:25px; font-weight:400; letter-spacing:.12em; margin-bottom:45px; }
+.photo-post { margin-bottom:50px; border-bottom:1px solid var(--line); }
+.photo-post header { display:flex; justify-content:space-between; gap:15px; flex-wrap:wrap; font-size:13px; padding:16px 0; }
+.photo-post time { color:var(--muted); font-size:11px; }
+.photo-post img { width:100%; height:auto; display:block; }
+.post-caption { white-space:pre-wrap; overflow-wrap:anywhere; line-height:2; font-size:14px; padding:10px 0 20px; }
+.empty-feed { color:var(--muted); font-size:14px; }
+.form-field textarea { width:100%; resize:vertical; font:inherit; padding:14px; border:1px solid var(--line); background:#fff9; color:var(--ink); }
+.form-field textarea:focus-visible { outline:2px solid #596f96; outline-offset:3px; }
+.post-panel { max-width:650px; }
+@media(max-width:480px) { .site-header { flex-wrap:wrap; } nav { flex-wrap:wrap; } }

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}写真投稿 | 写真共有アプリ{% endblock %}
+{% block content %}
+<section class="auth-panel post-panel">
+    <p class="eyebrow">A MOMENT TO SHARE</p><h1>写真を投稿する</h1>
+    <p class="form-description">写真1枚、PNG・JPG・JPEG・GIF、5MBまで。<br>キャプションは任意で200文字までです。</p>
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('post_create') }}">
+        {{ form.hidden_tag() }}
+        <div class="form-field">{{ form.photo.label }}{{ form.photo(accept='.png,.jpg,.jpeg,.gif', aria_describedby='photo-error') }}
+        <div id="photo-error">{% for error in form.photo.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}</div></div>
+        <div class="form-field">{{ form.caption.label }}{{ form.caption(rows=5, maxlength=200, aria_describedby='caption-error') }}
+        <div id="caption-error">{% for error in form.caption.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}</div></div>
+        {{ form.submit(class_='primary-button') }}
+    </form>
+    <a class="account-link" href="{{ url_for('post_index') }}">一覧へ戻る</a>
+</section>
+{% endblock %}

@@ -30,6 +30,7 @@ class BaseModel(Model):
 
 class User(UserMixin, BaseModel):
     id = AutoField()
+    display_name = CharField(max_length=30, constraints=[Check("length(trim(display_name)) BETWEEN 1 AND 30")])
     email = CharField(max_length=254, unique=True, collation="BINARY")
     password_hash = TextField()
     created_at = DateTimeField(default=utc_now)
@@ -57,3 +58,17 @@ class Post(BaseModel):
 
     class Meta:
         table_name = "posts"
+
+
+def migrate_display_name():
+    """既存のID・認証情報・投稿を保ち、表示名だけを追加する。"""
+    with db.atomic():
+        if User.table_exists() and "display_name" not in {
+            column.name for column in db.get_columns("users")
+        }:
+            db.execute_sql(
+                "ALTER TABLE users ADD COLUMN display_name VARCHAR(30) "
+                "NOT NULL DEFAULT 'ユーザー' "
+                "CHECK(length(trim(display_name)) BETWEEN 1 AND 30)"
+            )
+            db.execute_sql("UPDATE users SET display_name = 'ユーザー' || id")

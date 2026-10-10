@@ -27,3 +27,7 @@ __pycache__/
 
 # macOSの管理ファイル
 .DS_Store
+
+# 投稿画像（空フォルダーの目印は追跡）
+uploads/posts/*
+!uploads/posts/.gitkeep
