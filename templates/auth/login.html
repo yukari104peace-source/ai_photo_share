@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}ログイン | 写真共有アプリ{% endblock %}
+{% block content %}
+<section class="auth-layout">
+    <div class="auth-intro"><p class="eyebrow">WELCOME BACK</p><p class="auth-poem">日々を、<br>分かちあう。</p><p>また、ここから。あなたの日々へ。</p><span class="intro-index">PHOTO JOURNAL / ACCOUNT</span></div>
+    <div class="auth-panel">
+        <p class="eyebrow">SIGN IN</p>
+        <h1>ログイン</h1>
+        <p class="form-description">メールアドレスとパスワードを入力してください。</p>
+        <form method="post" action="{{ url_for('login') }}">
+            {{ form.hidden_tag() }}
+            {% for field in [form.email, form.password] %}
+            <div class="form-field">
+                {{ field.label }}
+                {{ field(autocomplete=('email' if field.name == 'email' else 'current-password'), aria_invalid=('true' if field.errors else 'false'), aria_describedby=field.id ~ '-error') }}
+                <div id="{{ field.id }}-error">{% for error in field.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}</div>
+            </div>
+            {% endfor %}
+            {{ form.submit(class_='primary-button') }}
+        </form>
+        <a class="account-link" href="{{ url_for('register') }}">はじめての方はユーザー登録 <span aria-hidden="true">↗</span></a>
+    </div>
+</section>
+{% endblock %}

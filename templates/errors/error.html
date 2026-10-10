@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}エラー | 写真共有アプリ{% endblock %}
+{% block content %}
+<section class="error-panel"><p class="eyebrow">PLEASE TRY AGAIN</p><h1>もう一度、お試しください。</h1><p role="alert">{{ message }}</p><a class="text-link" href="{{ url_for('post_index') }}">トップへ戻る <span aria-hidden="true">↗</span></a></section>
+{% endblock %}

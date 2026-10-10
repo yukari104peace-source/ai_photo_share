@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}写真共有アプリ{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <header class="site-header">
+        <a class="brand" href="{{ url_for('post_index') }}" aria-label="写真共有アプリ トップ">日々<span class="brand-dot">.</span><small>PHOTO JOURNAL</small></a>
+        <nav aria-label="メインメニュー">
+            <a href="{{ url_for('post_index') }}">トップ</a>
+            {% if current_user.is_authenticated %}
+            <span class="login-status">ログイン中</span>
+            <form method="post" action="{{ url_for('logout') }}">
+                {{ logout_form.hidden_tag() }}
+                {{ logout_form.submit(class_='nav-button') }}
+            </form>
+            {% else %}
+            <a href="{{ url_for('login') }}">ログイン</a>
+            <a class="nav-button" href="{{ url_for('register') }}">ユーザー登録 <span aria-hidden="true">↗</span></a>
+            {% endif %}
+        </nav>
+    </header>
+    {% for message in get_flashed_messages() %}
+    <p class="notification" role="status">{{ message }}</p>
+    {% endfor %}
+    <main>{% block content %}{% endblock %}</main>
+    <footer class="site-footer"><span>日々のかけらを、写真に。</span><span>PHOTO SHARING APP</span></footer>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}ユーザー登録 | 写真共有アプリ{% endblock %}
+{% block content %}
+<section class="auth-layout">
+    <div class="auth-intro"><p class="eyebrow">MAKE ROOM FOR MEMORIES</p><p class="auth-poem">日々を、<br>分かちあう。</p><p>あなたの日々を、つないでいこう。</p><span class="intro-index">PHOTO JOURNAL / ACCOUNT</span></div>
+    <div class="auth-panel">
+        <p class="eyebrow">CREATE ACCOUNT</p>
+        <h1>ユーザー登録</h1>
+        <p class="form-description">パスワードは8文字以上で設定してください。</p>
+        <form method="post" action="{{ url_for('register') }}">
+            {{ form.hidden_tag() }}
+            {% for field in [form.email, form.password, form.password_confirm] %}
+            <div class="form-field">
+                {{ field.label }}
+                {{ field(autocomplete=('email' if field.name == 'email' else 'new-password'), aria_invalid=('true' if field.errors else 'false'), aria_describedby=field.id ~ '-error') }}
+                <div id="{{ field.id }}-error">{% for error in field.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}</div>
+            </div>
+            {% endfor %}
+            {{ form.submit(class_='primary-button') }}
+        </form>
+        <a class="account-link" href="{{ url_for('login') }}">登録済みの方はログイン <span aria-hidden="true">↗</span></a>
+    </div>
+</section>
+{% endblock %}
